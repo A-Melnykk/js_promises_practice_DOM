@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Функція для показу сповіщень.
+ * Функція для показу сповіщень згідно з вимогами завдання.
  * @param {string} text - Текст повідомлення
  * @param {boolean} isError - Чи це помилка
  */
@@ -10,23 +10,22 @@ function showNotification(text, isError = false) {
 
   notification.setAttribute('data-qa', 'notification');
   notification.textContent = text;
-  notification.classList.add('message');
 
   if (isError) {
-    notification.classList.add('error-message');
+    notification.classList.add('error');
+  } else {
+    notification.classList.add('success');
   }
 
   document.body.appendChild(notification);
 }
-
-const logo = document.querySelector('.logo');
 
 const firstPromise = new Promise((resolve, reject) => {
   const timeoutId = setTimeout(() => {
     reject(new Error('First promise was rejected'));
   }, 3000);
 
-  logo.addEventListener(
+  document.addEventListener(
     'click',
     () => {
       clearTimeout(timeoutId);
@@ -41,13 +40,15 @@ firstPromise
   .catch((err) => showNotification(err.message, true));
 
 const leftClick = new Promise((resolve) => {
-  logo.addEventListener('click', () => resolve('Second promise was resolved'), {
-    once: true,
-  });
+  document.addEventListener(
+    'click',
+    () => resolve('Second promise was resolved'),
+    { once: true },
+  );
 });
 
 const rightClick = new Promise((resolve) => {
-  logo.addEventListener(
+  document.addEventListener(
     'contextmenu',
     (e) => {
       e.preventDefault();
@@ -57,14 +58,16 @@ const rightClick = new Promise((resolve) => {
   );
 });
 
-Promise.any([leftClick, rightClick]).then((msg) => showNotification(msg));
+const secondPromise = Promise.any([leftClick, rightClick]);
+
+secondPromise.then((msg) => showNotification(msg));
 
 const leftForThird = new Promise((resolve) => {
-  logo.addEventListener('click', () => resolve(), { once: true });
+  document.addEventListener('click', () => resolve(), { once: true });
 });
 
 const rightForThird = new Promise((resolve) => {
-  logo.addEventListener(
+  document.addEventListener(
     'contextmenu',
     (e) => {
       e.preventDefault();
@@ -74,6 +77,8 @@ const rightForThird = new Promise((resolve) => {
   );
 });
 
-Promise.all([leftForThird, rightForThird]).then(() => {
+const thirdPromise = Promise.all([leftForThird, rightForThird]);
+
+thirdPromise.then(() => {
   showNotification('Third promise was resolved');
 });
